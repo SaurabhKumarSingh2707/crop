@@ -1,0 +1,60 @@
+Plant Disease Classification - Scikit-learn Model Report
+============================================================
+
+Best Model: RandomForest
+Test Accuracy: 0.5263
+
+Model Comparison:
+----------------------------------------
+RandomForest:
+  Train Accuracy: 1.0000
+  Test Accuracy: 0.5263
+  CV Score: 0.3993 ± 0.0382
+
+
+Detailed Classification Report:
+----------------------------------------
+                                                    precision    recall  f1-score   support
+
+                                Apple___Apple_scab       0.00      0.00      0.00         2
+                                 Apple___Black_rot       0.00      0.00      0.00         2
+                          Apple___Cedar_apple_rust       0.00      0.00      0.00         2
+                                   Apple___healthy       0.00      0.00      0.00         2
+                               Blueberry___healthy       0.00      0.00      0.00         2
+          Cherry_(including_sour)___Powdery_mildew       0.14      0.50      0.22         2
+                 Cherry_(including_sour)___healthy       0.00      0.00      0.00         2
+Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot       0.00      0.00      0.00         2
+                       Corn_(maize)___Common_rust_       0.14      1.00      0.25         2
+               Corn_(maize)___Northern_Leaf_Blight       0.00      0.00      0.00         2
+                            Corn_(maize)___healthy       0.05      1.00      0.09         2
+                                 Grape___Black_rot       0.00      0.00      0.00         2
+                      Grape___Esca_(Black_Measles)       0.00      0.00      0.00         2
+        Grape___Leaf_blight_(Isariopsis_Leaf_Spot)       0.00      0.00      0.00         2
+                                   Grape___healthy       0.00      0.00      0.00         2
+          Orange___Haunglongbing_(Citrus_greening)       0.18      1.00      0.31         2
+                            Peach___Bacterial_spot       0.00      0.00      0.00         2
+                                   Peach___healthy       0.00      0.00      0.00         2
+                     Pepper,_bell___Bacterial_spot       0.00      0.00      0.00         2
+                            Pepper,_bell___healthy       0.00      0.00      0.00         2
+                             Potato___Early_blight       0.00      0.00      0.00         2
+                              Potato___Late_blight       0.00      0.00      0.00         2
+                                  Potato___healthy       0.00      0.00      0.00         2
+                               Raspberry___healthy       0.00      0.00      0.00         2
+                                 Soybean___healthy       0.00      0.00      0.00         2
+                           Squash___Powdery_mildew       0.00      0.00      0.00         2
+                          Strawberry___Leaf_scorch       0.00      0.00      0.00         2
+                              Strawberry___healthy       0.00      0.00      0.00         2
+                           Tomato___Bacterial_spot       0.00      0.00      0.00         2
+                             Tomato___Early_blight       0.00      0.00      0.00         2
+                              Tomato___Late_blight       0.00      0.00      0.00         2
+                                Tomato___Leaf_Mold       0.00      0.00      0.00         2
+                       Tomato___Septoria_leaf_spot       0.00      0.00      0.00         2
+     Tomato___Spider_mites Two-spotted_spider_mite       0.00      0.00      0.00         2
+                              Tomato___Target_Spot       0.00      0.00      0.00         2
+            Tomato___Tomato_Yellow_Leaf_Curl_Virus       0.00      0.00      0.00         2
+                      Tomato___Tomato_mosaic_virus       0.00      0.00      0.00         2
+                                  Tomato___healthy       0.00      0.00      0.00         2
+
+                                          accuracy                           0.09        76
+                                         macro avg       0.01      0.09      0.02        76
+                                      weighted avg       0.01      0.09      0.02        76
