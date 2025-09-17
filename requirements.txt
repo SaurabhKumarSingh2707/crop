@@ -1,4 +1,5 @@
 # Requirements for Scikit-learn Plant Disease Classification
+gunicorn
 numpy>=1.21.0
 scikit-learn>=1.0.0
 opencv-python>=4.5.0
