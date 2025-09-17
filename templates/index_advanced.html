@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KrishiVannai AI - Plant Disease Prediction</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2d7d32;
+            --secondary-color: #4caf50;
+            --accent-color: #81c784;
+            --warning-color: #ff9800;
+            --error-color: #f44336;
+            --success-color: #4caf50;
+            --bg-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --card-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .model-badge {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Content Card */
+        .main-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+        .upload-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .tab-button.active {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-box {
+            border: 3px dashed #4CAF50;
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-box:hover, .upload-box.dragover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .upload-text p {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Options Panel */
+        .options-panel {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .option-group label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--secondary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .predict-btn {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            margin: 1rem 0;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            padding: 2rem;
+            background: white;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .image-preview {
+            text-align: center;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .image-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+
+        .prediction-results {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 1rem;
+        }
+
+        .top-prediction {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .top-prediction::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .prediction-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .confidence-display {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .confidence-bar {
+            background: rgba(255,255,255,0.3);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: white;
+            border-radius: 5px;
+            transition: width 1s ease-out;
+        }
+
+        .disease-info {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .severity-low { background: #4caf50; color: white; }
+        .severity-moderate { background: #ff9800; color: white; }
+        .severity-high { background: #f44336; color: white; }
+        .severity-critical { background: #d32f2f; color: white; }
+
+        .other-predictions {
+            margin-top: 1rem;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: white;
+            border-radius: 0.5rem;
+            border: 1px solid #e0e0e0;
+            transition: var(--transition);
+        }
+
+        .prediction-item:hover {
+            border-color: var(--secondary-color);
+            transform: translateX(5px);
+        }
+
+        .plant-info {
+            flex-grow: 1;
+        }
+
+        .plant-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+
+        .disease-name {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .confidence-badge {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-weight: 500;
+        }
+
+        .healthy-badge {
+            background: #4caf50;
+        }
+
+        /* Error Messages */
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid #f44336;
+            display: none;
+        }
+
+        /* Info Sections */
+        .info-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            box-shadow: var(--card-shadow);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-box {
+                padding: 2rem;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <span>KrishiVannai AI</span>
+            </div>
+            <div class="model-badge">
+                {{ model_info.model_type|title }} Model
+                {% if model_info.supports_tta %}
+                <i class="fas fa-star" title="Supports Test-Time Augmentation"></i>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1><i class="fas fa-microscope"></i> KrishiVannai AI Plant Disease Prediction</h1>
+            <p>Advanced AI-powered plant disease detection system. Upload plant images for instant diagnosis with KrishiVannai's cutting-edge deep learning technology.</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-card">
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="upload-tabs">
+                    <button class="tab-button active" onclick="switchTab('single')">
+                        <i class="fas fa-image"></i> Single Image
+                    </button>
+                    <button class="tab-button" onclick="switchTab('batch')">
+                        <i class="fas fa-images"></i> Batch Processing
+                    </button>
+                </div>
+
+                <!-- Single Image Upload -->
+                <div class="tab-content active" id="single-tab">
+                    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">
+                            <h3>Upload Plant Image</h3>
+                            <p>Click here or drag and drop your image</p>
+                            <p><small>Supports: PNG, JPG, JPEG, GIF, BMP, TIFF, WebP</small></p>
+                            <p><small>Maximum size: 32MB</small></p>
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="fileInput" class="file-input" accept=".png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp">
+                    
+                    <!-- Advanced Options -->
+                    <div class="options-panel">
+                        <h4><i class="fas fa-cogs"></i> Advanced Options</h4>
+                        <div class="options-grid">
+                            <div class="option-group">
+                                <label>Test-Time Augmentation</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="ttaToggle" checked>
+                                    <span class="slider"></span>
+                                </div>
+                                <small>Improves accuracy by testing multiple image variations</small>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label>Image Enhancement</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="enhanceToggle" checked>
+                                    <span class="slider"></span>
+                                </div>
+                                <small>Enhances contrast and sharpness</small>
+                            </div>
+                            
+                            <div class="option-group">
+                                <label>Top Predictions</label>
+                                <select id="topNSelect" style="padding: 0.5rem; border-radius: 0.25rem; border: 1px solid #ddd;">
+                                    <option value="3">Top 3</option>
+                                    <option value="5" selected>Top 5</option>
+                                    <option value="7">Top 7</option>
+                                    <option value="10">Top 10</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary predict-btn" id="predictBtn" onclick="makePrediction()">
+                        <i class="fas fa-search"></i> Analyze Plant
+                    </button>
+                </div>
+
+                <!-- Batch Upload -->
+                <div class="tab-content" id="batch-tab">
+                    <div class="upload-box" onclick="document.getElementById('batchFileInput').click()">
+                        <div class="upload-icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="upload-text">
+                            <h3>Batch Processing</h3>
+                            <p>Upload multiple images (max 10)</p>
+                            <p><small>Hold Ctrl/Cmd to select multiple files</small></p>
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="batchFileInput" class="file-input" multiple accept=".png,.jpg,.jpeg,.gif,.bmp,.tiff,.webp">
+                    
+                    <button class="btn btn-primary predict-btn" id="batchPredictBtn" onclick="makeBatchPrediction()">
+                        <i class="fas fa-layer-group"></i> Process Batch
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <h3>Analyzing your plant image...</h3>
+                <p>Our AI is examining the image for disease patterns</p>
+            </div>
+
+            <!-- Error Display -->
+            <div class="error" id="error"></div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="results">
+                <div class="results-header">
+                    <h2><i class="fas fa-chart-line"></i> Analysis Results</h2>
+                    <button class="btn btn-outline" onclick="resetForm()">
+                        <i class="fas fa-redo"></i> New Analysis
+                    </button>
+                </div>
+                
+                <div class="results-grid">
+                    <div class="image-preview">
+                        <h3><i class="fas fa-image"></i> Uploaded Image</h3>
+                        <img id="previewImage" class="preview-img" src="" alt="Uploaded plant image">
+                        <div class="image-info" id="imageInfo"></div>
+                    </div>
+                    
+                    <div class="prediction-results">
+                        <div class="top-prediction" id="topPrediction">
+                            <div class="prediction-title" id="topPredictionName">Disease Name</div>
+                            <div class="confidence-display" id="topPredictionConfidence">0%</div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="disease-info" id="diseaseInfo">
+                            <div id="severityBadge" class="severity-badge">Unknown Severity</div>
+                            <h4>Disease Information</h4>
+                            <p id="diseaseDescription">Description not available</p>
+                            
+                            <h5><i class="fas fa-medkit"></i> Treatment</h5>
+                            <p id="treatmentInfo">Treatment information not available</p>
+                            
+                            <h5><i class="fas fa-shield-alt"></i> Prevention</h5>
+                            <p id="preventionInfo">Prevention information not available</p>
+                        </div>
+                        
+                        <div class="other-predictions">
+                            <h4><i class="fas fa-list"></i> All Predictions</h4>
+                            <div id="allPredictions"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <h2><i class="fas fa-info-circle"></i> How It Works</h2>
+            <p>Our advanced AI system uses cutting-edge deep learning technology to analyze plant images and detect diseases with high accuracy.</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>Deep Learning AI</h4>
+                    <p>{{ model_info.model_type|title }} neural network trained on thousands of plant images</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-microscope"></i>
+                    </div>
+                    <h4>{{ model_info.num_classes or 38 }} Disease Classes</h4>
+                    <p>Detects diseases across multiple plant species including fruits and vegetables</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h4>Test-Time Augmentation</h4>
+                    <p>Advanced technique that tests multiple image variations for improved accuracy</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h4>Detailed Analysis</h4>
+                    <p>Get confidence scores, treatment recommendations, and prevention tips</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = null;
+        let currentTab = 'single';
+
+        // Tab switching
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+            
+            resetForm();
+        }
+
+        // File input handlers
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                selectedFiles = e.target.files;
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        document.getElementById('batchFileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                selectedFiles = e.target.files;
+                handleBatchFileSelect(e.target.files);
+            }
+        });
+
+        // Drag and drop handlers
+        const uploadBoxes = document.querySelectorAll('.upload-box');
+        uploadBoxes.forEach(box => {
+            box.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            box.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            box.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    if (currentTab === 'single') {
+                        selectedFiles = files;
+                        handleFileSelect(files[0]);
+                        document.getElementById('fileInput').files = files;
+                    } else {
+                        selectedFiles = files;
+                        handleBatchFileSelect(files);
+                        document.getElementById('batchFileInput').files = files;
+                    }
+                }
+            });
+        });
+
+        function handleFileSelect(file) {
+            if (!isValidFile(file)) {
+                showError('Please select a valid image file');
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImage').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            // Show predict button
+            document.getElementById('predictBtn').style.display = 'inline-flex';
+            hideError();
+            hideResults();
+        }
+
+        function handleBatchFileSelect(files) {
+            if (files.length > 10) {
+                showError('Maximum 10 files allowed for batch processing');
+                return;
+            }
+
+            let validFiles = 0;
+            for (let file of files) {
+                if (isValidFile(file)) validFiles++;
+            }
+
+            if (validFiles === 0) {
+                showError('No valid image files selected');
+                return;
+            }
+
+            // Update UI
+            const uploadBox = document.querySelector('#batch-tab .upload-box');
+            uploadBox.innerHTML = `
+                <div class="upload-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="upload-text">
+                    <h3>Ready to Process</h3>
+                    <p>${validFiles} valid image(s) selected</p>
+                </div>
+            `;
+
+            document.getElementById('batchPredictBtn').style.display = 'inline-flex';
+            hideError();
+            hideResults();
+        }
+
+        function isValidFile(file) {
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/tiff', 'image/webp'];
+            return allowedTypes.includes(file.type) && file.size <= 32 * 1024 * 1024;
+        }
+
+        async function makePrediction() {
+            if (!selectedFiles || selectedFiles.length === 0) {
+                showError('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFiles[0]);
+            formData.append('use_tta', document.getElementById('ttaToggle').checked);
+            formData.append('enhance_image', document.getElementById('enhanceToggle').checked);
+            formData.append('top_n', document.getElementById('topNSelect').value);
+
+            showLoading();
+            hideError();
+            hideResults();
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Server returned non-JSON response: ${text.substring(0, 100)}...`);
+                }
+
+                const data = await response.json();
+                hideLoading();
+
+                if (data.success) {
+                    showResults(data.results);
+                } else {
+                    showError(data.error || 'Prediction failed');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Prediction error:', error);
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        async function makeBatchPrediction() {
+            if (!selectedFiles || selectedFiles.length === 0) {
+                showError('Please select images first');
+                return;
+            }
+
+            const formData = new FormData();
+            for (let file of selectedFiles) {
+                if (isValidFile(file)) {
+                    formData.append('files', file);
+                }
+            }
+            formData.append('use_tta', 'false'); // Disabled for batch processing
+
+            showLoading();
+            hideError();
+            hideResults();
+
+            try {
+                const response = await fetch('/batch_predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Server returned non-JSON response: ${text.substring(0, 100)}...`);
+                }
+
+                const data = await response.json();
+                hideLoading();
+
+                if (data.success) {
+                    showBatchResults(data.results);
+                } else {
+                    showError(data.error || 'Batch prediction failed');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Batch prediction error:', error);
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        function showResults(results) {
+            // Update preview image
+            document.getElementById('previewImage').src = results.original_image;
+            
+            // Update image info
+            const imageInfo = document.getElementById('imageInfo');
+            imageInfo.innerHTML = `
+                <h4>Image Information</h4>
+                <p><strong>Filename:</strong> ${results.image_info.filename}</p>
+                <p><strong>Size:</strong> ${results.image_info.size[0]} × ${results.image_info.size[1]} pixels</p>
+                <p><strong>Format:</strong> ${results.image_info.format}</p>
+                <p><strong>Model:</strong> ${results.model_type}</p>
+                ${results.used_tta ? '<p><strong>TTA:</strong> Enabled</p>' : ''}
+            `;
+            
+            // Update top prediction
+            const topPred = results.all_predictions[0];
+            document.getElementById('topPredictionName').textContent = `${topPred.plant} - ${topPred.disease}`;
+            document.getElementById('topPredictionConfidence').textContent = topPred.confidence_percentage;
+            
+            // Update confidence bar
+            const confidencePercent = topPred.confidence * 100;
+            document.getElementById('confidenceFill').style.width = confidencePercent + '%';
+            
+            // Update disease info
+            const diseaseInfo = results.disease_info;
+            document.getElementById('severityBadge').textContent = diseaseInfo.severity + ' Severity';
+            document.getElementById('severityBadge').className = `severity-badge severity-${diseaseInfo.severity.toLowerCase()}`;
+            document.getElementById('diseaseDescription').textContent = diseaseInfo.description;
+            document.getElementById('treatmentInfo').textContent = diseaseInfo.treatment;
+            document.getElementById('preventionInfo').textContent = diseaseInfo.prevention;
+            
+            // Update all predictions
+            const allPredictionsDiv = document.getElementById('allPredictions');
+            allPredictionsDiv.innerHTML = '';
+            
+            results.all_predictions.forEach(pred => {
+                const predItem = document.createElement('div');
+                predItem.className = 'prediction-item';
+                predItem.innerHTML = `
+                    <div class="plant-info">
+                        <div class="plant-name">${pred.plant}</div>
+                        <div class="disease-name">${pred.disease}</div>
+                    </div>
+                    <div class="confidence-badge ${pred.is_healthy ? 'healthy-badge' : ''}">${pred.confidence_percentage}</div>
+                `;
+                allPredictionsDiv.appendChild(predItem);
+            });
+            
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').classList.add('slide-up');
+        }
+
+        function showBatchResults(results) {
+            // Create batch results display
+            const resultsSection = document.getElementById('results');
+            resultsSection.innerHTML = `
+                <div class="results-header">
+                    <h2><i class="fas fa-chart-line"></i> Batch Analysis Results</h2>
+                    <button class="btn btn-outline" onclick="resetForm()">
+                        <i class="fas fa-redo"></i> New Analysis
+                    </button>
+                </div>
+                <div class="batch-results">
+                    <h3>Processed ${results.length} images</h3>
+                    <div class="batch-grid" id="batchGrid"></div>
+                </div>
+            `;
+
+            const batchGrid = document.getElementById('batchGrid');
+            results.forEach((result, index) => {
+                const resultCard = document.createElement('div');
+                resultCard.className = 'batch-result-card';
+                resultCard.style.cssText = `
+                    background: white;
+                    padding: 1rem;
+                    border-radius: 0.5rem;
+                    margin: 1rem 0;
+                    box-shadow: var(--card-shadow);
+                    display: flex;
+                    gap: 1rem;
+                    align-items: center;
+                `;
+
+                if (result.error) {
+                    resultCard.innerHTML = `
+                        <div style="color: var(--error-color);">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            ${result.error}
+                        </div>
+                    `;
+                } else {
+                    const topPred = result.all_predictions[0];
+                    resultCard.innerHTML = `
+                        <img src="${result.original_image}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0.5rem;">
+                        <div style="flex-grow: 1;">
+                            <h4>${result.image_info.filename}</h4>
+                            <p><strong>${topPred.plant} - ${topPred.disease}</strong></p>
+                            <p>Confidence: ${topPred.confidence_percentage}</p>
+                        </div>
+                        <div class="confidence-badge ${topPred.is_healthy ? 'healthy-badge' : ''}">${topPred.confidence_percentage}</div>
+                    `;
+                }
+
+                batchGrid.appendChild(resultCard);
+            });
+
+            resultsSection.style.display = 'block';
+            resultsSection.classList.add('slide-up');
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').classList.add('fade-in');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            errorDiv.style.display = 'block';
+            errorDiv.classList.add('fade-in');
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function hideResults() {
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function resetForm() {
+            selectedFiles = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('batchFileInput').value = '';
+            document.getElementById('predictBtn').style.display = 'none';
+            document.getElementById('batchPredictBtn').style.display = 'none';
+            hideError();
+            hideResults();
+            hideLoading();
+
+            // Reset upload boxes
+            document.querySelectorAll('.upload-box').forEach(box => {
+                const isEvenBatch = box.closest('#batch-tab');
+                box.innerHTML = `
+                    <div class="upload-icon">
+                        <i class="fas fa-${isEvenBatch ? 'layer-group' : 'cloud-upload-alt'}"></i>
+                    </div>
+                    <div class="upload-text">
+                        <h3>${isEvenBatch ? 'Batch Processing' : 'Upload Plant Image'}</h3>
+                        <p>${isEvenBatch ? 'Upload multiple images (max 10)' : 'Click here or drag and drop your image'}</p>
+                        ${isEvenBatch ? '<p><small>Hold Ctrl/Cmd to select multiple files</small></p>' : '<p><small>Supports: PNG, JPG, JPEG, GIF, BMP, TIFF, WebP</small></p><p><small>Maximum size: 32MB</small></p>'}
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
