@@ -1,13 +1,10 @@
 # Requirements for Scikit-learn Plant Disease Classification
-gunicorn
-numpy>=1.21.0
-scikit-learn>=1.0.0
-opencv-python>=4.5.0
-scikit-image>=0.18.0
-joblib>=1.0.0
-matplotlib>=3.3.0
-seaborn>=0.11.0
-tqdm>=4.62.0
-Flask>=2.0.0
-Pillow>=8.0.0
-pandas>=1.3.0
+Flask==2.3.3
+gunicorn==21.2.0
+numpy==1.24.3
+scikit-learn==1.3.0
+opencv-python-headless==4.8.0.76
+scikit-image==0.21.0
+joblib==1.3.2
+Pillow==10.0.0
+Werkzeug==2.3.7

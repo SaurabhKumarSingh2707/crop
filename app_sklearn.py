@@ -153,23 +153,54 @@ class SklearnPlantDiseasePredictor:
         """Get model information"""
         return self.model_info
 
+def download_model_from_url():
+    """Download model from a URL if not found locally (for deployment)"""
+    # You can host your model file on GitHub releases or Google Drive
+    # This is a placeholder - replace with your actual model URL
+    model_url = "https://github.com/SaurabhKumarSingh2707/crop/releases/download/v1.0/plant_disease_sklearn_model.pkl"
+    
+    try:
+        import urllib.request
+        logger.info(f"🌐 Downloading model from {model_url}...")
+        urllib.request.urlretrieve(model_url, 'plant_disease_sklearn_model.pkl')
+        logger.info("✅ Model downloaded successfully!")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Failed to download model: {e}")
+        return False
+
 def load_predictor():
     """Load the scikit-learn predictor"""
     global predictor
     
+    # Try different possible paths for the model files
     model_files = [
         'plant_disease_sklearn_model.pkl',
-        'plant_disease_sklearn_model_joblib.pkl'
+        'plant_disease_sklearn_model_joblib.pkl',
+        './plant_disease_sklearn_model.pkl',
+        './plant_disease_sklearn_model_joblib.pkl',
+        os.path.join(os.path.dirname(__file__), 'plant_disease_sklearn_model.pkl'),
+        os.path.join(os.path.dirname(__file__), 'plant_disease_sklearn_model_joblib.pkl')
     ]
     
     logger.info("🔍 Looking for model files...")
-    for model_file in model_files:
-        logger.info(f"📁 Checking: {model_file} - {'Found' if os.path.exists(model_file) else 'Not found'}")
+    logger.info(f"📂 Current working directory: {os.getcwd()}")
+    logger.info(f"📂 Script directory: {os.path.dirname(__file__)}")
+    
+    # List all files in current directory for debugging
+    try:
+        files_in_dir = os.listdir('.')
+        logger.info(f"📁 Files in current directory: {files_in_dir}")
+    except Exception as e:
+        logger.error(f"❌ Error listing directory: {e}")
     
     for model_file in model_files:
+        logger.info(f"📁 Checking: {model_file} - {'Found' if os.path.exists(model_file) else 'Not found'}")
         if os.path.exists(model_file):
             try:
                 logger.info(f"🔄 Attempting to load {model_file}...")
+                file_size = os.path.getsize(model_file)
+                logger.info(f"📊 File size: {file_size} bytes")
                 predictor = SklearnPlantDiseasePredictor(model_file)
                 logger.info(f"✅ Predictor loaded successfully from {model_file}")
                 return True
@@ -180,6 +211,10 @@ def load_predictor():
                 continue
     
     logger.error("❌ No valid model file found!")
+    logger.error("💡 Possible solutions:")
+    logger.error("   1. Ensure model files are uploaded to deployment")
+    logger.error("   2. Check if files are too large for Git (use Git LFS)")
+    logger.error("   3. Re-train the model if files are corrupted")
     return False
 
 def allowed_file(filename):
@@ -866,19 +901,75 @@ if not os.path.exists('templates'):
 with open('templates/index_sklearn.html', 'w', encoding='utf-8') as f:
     f.write(template_content)
 
+def create_dummy_model():
+    """Create a dummy model for deployment when real model files are missing"""
+    logger.warning("🔄 Creating dummy model as fallback...")
+    
+    # Import required libraries (these are already imported at the top)
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.preprocessing import LabelEncoder
+    
+    # Create dummy data and model
+    dummy_features = np.random.random((100, 100))  # 100 samples, 100 features
+    dummy_labels = [f"Disease_{i%10}" for i in range(100)]  # 10 dummy classes
+    
+    # Create and train dummy model
+    model = RandomForestClassifier(n_estimators=10, random_state=42)
+    label_encoder = LabelEncoder()
+    encoded_labels = label_encoder.fit_transform(dummy_labels)
+    model.fit(dummy_features, encoded_labels)
+    
+    # Create dummy feature extractor
+    feature_extractor = PlantDiseaseFeatureExtractor()
+    
+    # Create model data structure
+    model_data = {
+        'model': model,
+        'feature_extractor': feature_extractor,
+        'label_encoder': label_encoder,
+        'class_names': label_encoder.classes_.tolist(),
+        'model_name': 'DummyRandomForest',
+        'test_accuracy': 0.1,  # Low accuracy for dummy model
+        'num_classes': len(label_encoder.classes_)
+    }
+    
+    # Save dummy model
+    with open('dummy_model.pkl', 'wb') as f:
+        pickle.dump(model_data, f)
+    
+    logger.warning("⚠️ Dummy model created. This is for deployment testing only!")
+    return 'dummy_model.pkl'
+
 if __name__ == '__main__':
     print("🌱 KrishiVannai AI - Plant Disease Detection (Scikit-learn Version)")
     print("=" * 60)
     
     # Load the predictor
     if not load_predictor():
-        print("❌ Failed to load model. Please ensure the model file exists.")
-        exit(1)
+        print("❌ Failed to load model from local files.")
+        print("🌐 Attempting to download model from remote URL...")
+        if download_model_from_url() and load_predictor():
+            print("✅ Model downloaded and loaded successfully!")
+        else:
+            print("❌ Failed to download model. Attempting to create dummy model...")
+            try:
+                dummy_model_path = create_dummy_model()
+                predictor = SklearnPlantDiseasePredictor(dummy_model_path)
+                print("⚠️ Using dummy model for deployment. Predictions will be random!")
+            except Exception as e:
+                print(f"❌ Failed to create dummy model: {e}")
+                print("💡 Please check your deployment configuration and model files.")
+                exit(1)
     
     print("🚀 Starting Flask application...")
     print(f"📊 Model: {predictor.get_model_info()['model_name']}")
     print(f"🎯 Accuracy: {predictor.get_model_info()['test_accuracy']:.4f}")
     print(f"📊 Classes: {predictor.get_model_info()['num_classes']}")
-    print("🌐 Server will start at http://127.0.0.1:5002")
     
-    app.run(debug=True, host='127.0.0.1', port=5002)
+    # Use environment variable for port (Render.com requirement)
+    port = int(os.environ.get('PORT', 5002))
+    host = '0.0.0.0'  # Required for Render.com
+    
+    print(f"🌐 Server will start at http://{host}:{port}")
+    
+    app.run(debug=False, host=host, port=port)  # debug=False for production
