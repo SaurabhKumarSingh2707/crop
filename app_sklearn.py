@@ -162,14 +162,21 @@ def load_predictor():
         'plant_disease_sklearn_model_joblib.pkl'
     ]
     
+    logger.info("🔍 Looking for model files...")
+    for model_file in model_files:
+        logger.info(f"📁 Checking: {model_file} - {'Found' if os.path.exists(model_file) else 'Not found'}")
+    
     for model_file in model_files:
         if os.path.exists(model_file):
             try:
+                logger.info(f"🔄 Attempting to load {model_file}...")
                 predictor = SklearnPlantDiseasePredictor(model_file)
-                logger.info(f"✅ Predictor loaded from {model_file}")
+                logger.info(f"✅ Predictor loaded successfully from {model_file}")
                 return True
             except Exception as e:
                 logger.error(f"❌ Failed to load {model_file}: {e}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
                 continue
     
     logger.error("❌ No valid model file found!")
@@ -190,6 +197,13 @@ def index():
 def predict():
     """Handle image upload and prediction"""
     try:
+        # Check if predictor is loaded
+        if predictor is None:
+            return jsonify({
+                'success': False, 
+                'error': 'Model not loaded. Please check the model files.'
+            })
+        
         if 'file' not in request.files:
             return jsonify({'success': False, 'error': 'No file provided'})
         
